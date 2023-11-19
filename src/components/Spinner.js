@@ -2,8 +2,8 @@ import React, { Component } from "react";
 export class Spinner extends Component {
   render() {
     return (
-      <div>
-        <img src="" alt="" />
+      <div className="text-center">
+        <img src="Loader.gif" alt="" />
       </div>
     );
   }

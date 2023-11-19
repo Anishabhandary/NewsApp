@@ -1,16 +1,17 @@
 import React, { Component } from "react";
 import NewsItem from "./NewsItem";
 import PropTypes from "prop-types";
+import Spinner from "./Spinner";
 export class News extends Component {
   static defaultProps = {
     country: "in",
-    pageSize: 8,
+    pageSize: "8",
     category: "general",
   };
 
   static propTypes = {
     country: PropTypes.string,
-    pageSize: PropTypes.number,
+    pageSize: PropTypes.string,
     category: PropTypes.string,
   };
   constructor() {
@@ -24,12 +25,14 @@ export class News extends Component {
 
   componentDidMount() {
     let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=d7486b4b71764dfbb783de6884d03f5e&page=1&pageSize=${this.props.pageSize}`;
+    this.setState({ loading: true });
     fetch(url).then((res) => {
       res.json().then((result) => {
         console.log(result.articles);
         this.setState({
           data: result.articles,
           totalResults: result.totalResults,
+          loading: false,
         });
       });
     });
@@ -44,16 +47,24 @@ export class News extends Component {
     }&apiKey=d7486b4b71764dfbb783de6884d03f5e&page=${
       this.state.page - 1
     }&pageSize=${this.props.pageSize}`;
+    this.setState({ loading: true });
     fetch(url).then((res) => {
       res.json().then((result) => {
         console.log(result.articles);
-        this.setState({ data: result.articles, page: this.state.page - 1 });
+        this.setState({
+          data: result.articles,
+          page: this.state.page - 1,
+          loading: false,
+        });
       });
     });
   };
   handleNextClick = async () => {
     console.log("next");
-    if (this.state.page + 1 > Math.ceil(this.state.totalResults / 15)) {
+    if (
+      this.state.page + 1 >
+      Math.ceil(this.state.totalResults / this.props.pageSize)
+    ) {
     } else {
       let url = `https://newsapi.org/v2/top-headlines?country=${
         this.props.country
@@ -62,10 +73,15 @@ export class News extends Component {
       }&apiKey=d7486b4b71764dfbb783de6884d03f5e&page=${
         this.state.page + 1
       }&pageSize=${this.props.pageSize}`;
+      this.setState({ loading: true });
       fetch(url).then((res) => {
         res.json().then((result) => {
           console.log(result.articles);
-          this.setState({ data: result.articles, page: this.state.page + 1 });
+          this.setState({
+            data: result.articles,
+            page: this.state.page + 1,
+            loading: false,
+          });
         });
       });
     }
@@ -75,6 +91,7 @@ export class News extends Component {
     return (
       <div className="container my-3">
         <h1>DAILY HEAD-LINES</h1>
+        {this.state.loading && <Spinner />}
         <div className="row">
           {this.state.data
             ? this.state.data.map((element) => {
@@ -82,12 +99,19 @@ export class News extends Component {
                   <>
                     <div className="col-md-4 my-3" key={element.url}>
                       <NewsItem
-                        title={element.title ? element.title.slice(0, 45) : ""}
+                        title={
+                          element.title
+                            ? !this.state.loading && element.title.slice(0, 45)
+                            : ""
+                        }
                         description={
                           element.description
                             ? element.description.slice(0, 88)
                             : ""
                         }
+                        author={element.author}
+                        publishedAt={element.publishedAt}
+                        source={element.source.name}
                         imgUrl={
                           element.urlToImage
                             ? element.urlToImage
@@ -113,6 +137,10 @@ export class News extends Component {
           <button
             type="button"
             className="btn btn-dark"
+            disabled={
+              this.state.page + 1 >
+              Math.ceil(this.state.totalResults / this.props.pageSize)
+            }
             onClick={this.handleNextClick}
           >
             next &rarr;

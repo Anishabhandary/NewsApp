@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import NewsItem from "./NewsItem";
 import PropTypes from "prop-types";
 import Spinner from "./Spinner";
+
 export class News extends Component {
   static defaultProps = {
     country: "in",
@@ -14,21 +15,28 @@ export class News extends Component {
     pageSize: PropTypes.string,
     category: PropTypes.string,
   };
-  constructor() {
-    super();
+  capitalizeTitle = (docTitle) => {
+    return docTitle.charAt(0).toUpperCase() + docTitle.slice(1);
+  };
+  constructor(props) {
+    super(props);
     this.state = {
       data: null,
       loading: false,
       page: 1,
     };
+    document.title = `NewsDaily|${this.capitalizeTitle(this.props.category)}`;
   }
-
   componentDidMount() {
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=d7486b4b71764dfbb783de6884d03f5e&page=1&pageSize=${this.props.pageSize}`;
+    console.log("CDM");
+    this.props.setProgress(10);
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=d7486b4b71764dfbb783de6884d03f5e&page=${this.state.page}&pageSize=${this.props.pageSize}`;
     this.setState({ loading: true });
+    // this.props.setProgress(30);
     fetch(url).then((res) => {
       res.json().then((result) => {
         console.log(result.articles);
+        this.props.setProgress(100);
         this.setState({
           data: result.articles,
           totalResults: result.totalResults,
@@ -36,9 +44,10 @@ export class News extends Component {
         });
       });
     });
+    // this.props.setProgress(100);
   }
 
-  handlePrevClick = async () => {
+  handlePrevClick = () => {
     console.log("prev");
     let url = `https://newsapi.org/v2/top-headlines?country=${
       this.props.country
@@ -59,7 +68,7 @@ export class News extends Component {
       });
     });
   };
-  handleNextClick = async () => {
+  handleNextClick = () => {
     console.log("next");
     if (
       this.state.page + 1 >
@@ -88,22 +97,20 @@ export class News extends Component {
   };
 
   render() {
+    console.log("render");
     return (
       <div className="container my-3">
-        <h1>DAILY HEAD-LINES</h1>
+        <h1>DAILY HEAD-LINES on {this.capitalizeTitle(this.props.category)}</h1>
         {this.state.loading && <Spinner />}
         <div className="row">
           {this.state.data
-            ? this.state.data.map((element) => {
+            ? !this.state.loading &&
+              this.state.data.map((element) => {
                 return (
                   <>
                     <div className="col-md-4 my-3" key={element.url}>
                       <NewsItem
-                        title={
-                          element.title
-                            ? !this.state.loading && element.title.slice(0, 45)
-                            : ""
-                        }
+                        title={element.title ? element.title.slice(0, 45) : ""}
                         description={
                           element.description
                             ? element.description.slice(0, 88)

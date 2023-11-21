@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import NewsItem from "./NewsItem";
 import PropTypes from "prop-types";
-import Spinner from "./Spinner";
+// import Spinner from "./Spinner";
 
 const News = (props) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
-  // document.title = `NewsDaily|${capitalizeTitle(props.category)}`;
+
   const capitalizeTitle = (docTitle) => {
     return docTitle.charAt(0).toUpperCase() + docTitle.slice(1);
   };
 
   useEffect(() => {
-    console.log("CDM");
+    document.title = `NewsDaily|${capitalizeTitle(props.category)}`;
     props.setProgress(10);
     let url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=${props.apiKey}&page=${page}&pageSize=${props.pageSize}`;
     setLoading(true);
@@ -28,10 +28,11 @@ const News = (props) => {
         setLoading(false);
       });
     });
+    // eslint-disable-next-line
   }, []);
 
   const handlePrevClick = () => {
-    console.log("prev");
+    props.setProgress(10);
     let url = `https://newsapi.org/v2/top-headlines?country=${
       props.country
     }&category=${props.category}&apiKey=${props.apiKey}&page=${
@@ -41,6 +42,7 @@ const News = (props) => {
     fetch(url).then((res) => {
       res.json().then((result) => {
         console.log(result.articles);
+        props.setProgress(100);
         setData(result.articles);
         setPage(page - 1);
         setLoading(false);
@@ -48,7 +50,7 @@ const News = (props) => {
     });
   };
   const handleNextClick = () => {
-    console.log("next");
+    props.setProgress(10);
     if (page + 1 > Math.ceil(totalResults / props.pageSize)) {
     } else {
       let url = `https://newsapi.org/v2/top-headlines?country=${
@@ -60,6 +62,7 @@ const News = (props) => {
       fetch(url).then((res) => {
         res.json().then((result) => {
           console.log(result.articles);
+          props.setProgress(100);
           setData(result.articles);
           setPage(page + 1);
           setLoading(false);
@@ -68,11 +71,12 @@ const News = (props) => {
     }
   };
 
-  console.log("render");
   return (
     <div className="container my-3">
-      <h1>DAILY HEAD-LINES on {capitalizeTitle(props.category)}</h1>
-      {loading && <Spinner />}
+      <h1 style={{ marginTop: "80px" }}>
+        DAILY HEAD-LINES on {capitalizeTitle(props.category)}
+      </h1>
+      {/* {loading && <Spinner />} */}
       <div className="row">
         {data
           ? !loading &&

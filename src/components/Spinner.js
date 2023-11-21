@@ -1,12 +1,10 @@
-import React, { Component } from "react";
-export class Spinner extends Component {
-  render() {
-    return (
-      <div className="text-center">
-        <img src="Loader.gif" alt="" />
-      </div>
-    );
-  }
-}
+import React from "react";
+const Spinner = () => {
+  return (
+    <div className="text-center">
+      <img src="Loader.gif" alt="" />
+    </div>
+  );
+};
 
 export default Spinner;
